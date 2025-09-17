@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydrAI - Groundwater Resource Intelligence Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #1a202c;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #1a202c;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            background: #f0f8ff;
+            border: 1px solid #667eea;
+            color: #1a202c;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .cta-btn:hover {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .main-content {
+            margin-top: 80px;
+        }
+
+        .hero-section {
+            background: #ffffff;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1a202c;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #4a5568;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border: 2px solid #e2e8f0;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+            background: #f0f8ff;
+            color: #1a202c;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .stat-box {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .features-section {
+            padding: 4rem 2rem;
+            background: #ffffff;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #1a202c;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #4a5568;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: #f7fafc;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #1a202c;
+        }
+
+        .feature-description {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .demo-preview {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .demo-interface {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-message {
+            flex: 1;
+            text-align: left;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .data-section {
+            padding: 4rem 2rem;
+            background: #ffffff;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .data-card {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .data-icon {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .data-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a202c;
+        }
+
+        .data-description {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            background: #1a202c;
+            color: #ffffff;
+            padding: 3rem 2rem 1rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .footer-section a {
+            color: #cbd5e0;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #667eea;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #4a5568;
+            padding-top: 1rem;
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-tint"></i>
+            </div>
+            <div class="logo-text">
+                <h1>HydrAI</h1>
+                <p>Groundwater Intelligence</p>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="#features"><i class="fas fa-cog"></i> Features</a>
+            <a href="#data"><i class="fas fa-database"></i> Data</a>
+            <a href="#about"><i class="fas fa-info-circle"></i> About</a>
+            <a href="#contact"><i class="fas fa-envelope"></i> Contact</a>
+            <a href="chatbot.html" class="cta-btn">Launch ChatBot</a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Intelligent Groundwater Resource Analysis</h1>
+                <p class="hero-subtitle">
+                    Harness the power of AI to access, analyze, and understand India's groundwater resources. 
+                    Get real-time insights, historical data, and predictive analytics through our advanced ChatBot interface.
+                </p>
+                
+                <div class="hero-buttons">
+                    <a href="chatbot.html" class="btn-primary">
+                        <i class="fas fa-robot"></i> Try HydrAI ChatBot
+                    </a>
+                    <a href="#features" class="btn-secondary">
+                        <i class="fas fa-play-circle"></i> Watch Demo
+                    </a>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">6,584</div>
+                        <div class="stat-label">Assessment Units</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">4,875</div>
+                        <div class="stat-label">Safe Units</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">437.6</div>
+                        <div class="stat-label">BCM Annual Recharge</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">AI Assistance</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section" id="features">
+            <div class="section-container">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">
+                    Advanced AI capabilities designed specifically for groundwater resource management and analysis
+                </p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="feature-title">Intelligent Query Processing</h3>
+                        <p class="feature-description">
+                            Natural language processing enables intuitive queries about groundwater data. 
+                            Ask questions in plain English and get comprehensive, accurate responses.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="feature-title">Real-time Data Analysis</h3>
+                        <p class="feature-description">
+                            Access live groundwater assessment data, extraction rates, recharge information, 
+                            and status classifications for any block, district, or state across India.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h3 class="feature-title">Historical Trend Analysis</h3>
+                        <p class="feature-description">
+                            Explore historical groundwater data trends, compare year-over-year changes, 
+                            and identify long-term patterns for informed decision-making.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-globe-asia"></i>
+                        </div>
+                        <h3 class="feature-title">Multilingual Support</h3>
+                        <p class="feature-description">
+                            Communicate in English, Hindi, Telugu, Tamil, and other regional languages 
+                            for better accessibility across diverse user groups.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3 class="feature-title">Interactive Visualizations</h3>
+                        <p class="feature-description">
+                            Generate dynamic charts, maps, and data tables to visualize groundwater information. 
+                            Export data and insights for reports and presentations.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3 class="feature-title">Predictive Analytics</h3>
+                        <p class="feature-description">
+                            Leverage machine learning models to predict future groundwater scenarios, 
+                            identify at-risk areas, and support proactive resource management.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="demo-section">
+            <div class="demo-container">
+                <h2 class="section-title">See HydrAI in Action</h2>
+                <p class="section-subtitle">
+                    Experience how easy it is to get groundwater insights with our AI-powered interface
+                </p>
+
+                <div class="demo-preview">
+                    <div class="demo-interface">
+                        <div class="demo-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="demo-message">
+                            "What's the groundwater status in Punjab?"
+                        </div>
+                    </div>
+
+                    <div class="demo-interface">
+                        <div class="demo-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="demo-message">
+                            "Punjab has 109 over-exploited blocks (79% of state total). The state shows declining groundwater levels at -5% annually. I can provide detailed block-wise analysis and trend comparisons."
+                        </div>
+                    </div>
+
+                    <div class="demo-interface">
+                        <div class="demo-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="demo-message">
+                            "Show me the trend analysis for the last 5 years"
+                        </div>
+                    </div>
+
+                    <a href="chatbot.html" class="btn-primary" style="margin-top: 1rem;">
+                        <i class="fas fa-rocket"></i> Start Your Analysis
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="data-section" id="data">
+            <div class="section-container">
+                <h2 class="section-title">Comprehensive Data Coverage</h2>
+                <p class="section-subtitle">
+                    Access authoritative groundwater data from CGWB and State Ground Water Departments
+                </p>
+
+                <div class="data-grid">
+                    <div class="data-card">
+                        <div class="data-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3 class="data-title">Geographic Coverage</h3>
+                        <p class="data-description">Complete coverage of all states, districts, and assessment units across India</p>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="data-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3 class="data-title">Current Assessments</h3>
+                        <p class="data-description">Latest 2024-25 groundwater assessment data with regular updates</p>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="data-icon">
+                            <i class="fas fa-archive"></i>
+                        </div>
+                        <h3 class="data-title">Historical Records</h3>
+                        <p class="data-description">Multi-year historical data for trend analysis and comparisons</p>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="data-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="data-title">Authoritative Sources</h3>
+                        <p class="data-description">Data sourced from CGWB and official State Ground Water Departments</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>HydrAI Platform</h4>
+                <a href="#"><i class="fas fa-robot"></i> ChatBot Interface</a>
+                <a href="#"><i class="fas fa-chart-line"></i> Analytics Dashboard</a>
+                <a href="#"><i class="fas fa-map"></i> GIS Portal</a>
+                <a href="#"><i class="fas fa-download"></i> Data Export</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Data & Resources</h4>
+                <a href="#"><i class="fas fa-database"></i> INGRES Database</a>
+                <a href="#"><i class="fas fa-file-alt"></i> Documentation</a>
+                <a href="#"><i class="fas fa-graduation-cap"></i> Training Materials</a>
+                <a href="#"><i class="fas fa-code"></i> API Access</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Support</h4>
+                <a href="#"><i class="fas fa-question-circle"></i> Help Center</a>
+                <a href="#"><i class="fas fa-book"></i> User Guide</a>
+                <a href="#"><i class="fas fa-envelope"></i> Contact Support</a>
+                <a href="#"><i class="fas fa-bug"></i> Report Issues</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Organization</h4>
+                <a href="#"><i class="fas fa-building"></i> Central Ground Water Board</a>
+                <a href="#"><i class="fas fa-university"></i> Ministry of Jal Shakti</a>
+                <a href="#"><i class="fas fa-handshake"></i> State Partnerships</a>
+                <a href="#"><i class="fas fa-globe"></i> International Cooperation</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 HydrAI - Groundwater Resource Intelligence Platform. Developed for CGWB and State Ground Water Departments.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.background = '#ffffff';
+                header.style.backdropFilter = 'none';
+            }
+        });
+
+        // Animate stats on scroll
+        const observerOptions = {
+            threshold: 0.5,
+            triggerOnce: true
+        };
+
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumbers = entry.target.querySelectorAll('.stat-number');
+                    statNumbers.forEach((stat, index) => {
+                        const finalValue = stat.textContent;
+                        stat.textContent = '0';
+                        
+                        setTimeout(() => {
+                            animateValue(stat, 0, finalValue, 1000);
+                        }, index * 200);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        const heroStats = document.querySelector('.hero-stats');
+        if (heroStats) {
+            statsObserver.observe(heroStats);
+        }
+
+        function animateValue(element, start, end, duration) {
+            const range = end - start;
+            const minTimer = 50;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            const timer = stepTime < minTimer ? minTimer : stepTime;
+            const startTime = new Date().getTime();
+            
+            function run() {
+                const now = new Date().getTime();
+                const remaining = Math.max((startTime + duration) - now, 0);
+                const value = Math.round(end - (remaining / duration) * range);
+                element.textContent = value === parseInt(end) ? end : value;
+                
+                if (value == end) {
+                    clearInterval(timer);
+                }
+            }
+            
+            const timer2 = setInterval(run, timer);
+            run();
+        }
+    </script>
+</body>
+</html>
