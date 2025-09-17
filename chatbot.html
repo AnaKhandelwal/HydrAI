@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydrAI - Groundwater Resource Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #1a202c;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #1a202c;
+        }
+
+        .main-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            gap: 1px;
+            background: #e2e8f0;
+            max-height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            background: #ffffff;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .quick-actions h3 {
+            color: #1a202c;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #ffffff;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .action-btn:hover {
+            background: #f0f8ff;
+            border-color: #667eea;
+            color: #1a202c;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .stats-panel {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stats-panel h4 {
+            margin-bottom: 1rem;
+            color: #1a202c;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #4a5568;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .chat-container {
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            border-bottom: 2px solid #4a5568;
+        }
+
+        .chat-header h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            color: #cbd5e0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 1rem 1.25rem;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .message.bot .message-content {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #1a202c;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #ffffff;
+        }
+
+        .typing-indicator {
+            display: none;
+            gap: 0.5rem;
+            align-items: center;
+            color: #718096;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.2rem;
+        }
+
+        .typing-dot {
+            width: 5px;
+            height: 5px;
+            background: #4a5568;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .chat-input {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            outline: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #4a5568;
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .visualization-panel {
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .viz-header {
+            padding: 1rem;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .viz-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .viz-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .viz-tab {
+            padding: 0.4rem 0.8rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #4a5568;
+            transition: all 0.3s ease;
+        }
+
+        .viz-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            border-color: #667eea;
+        }
+
+        .viz-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .data-table td {
+            color: #4a5568;
+        }
+
+        .status-safe {
+            color: #38a169;
+            font-weight: 600;
+        }
+
+        .status-critical {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+
+        .status-semi {
+            color: #d69e2e;
+            font-weight: 600;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .lang-btn {
+            padding: 0.3rem 0.7rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: #4a5568;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            border-color: #667eea;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #718096;
+            margin: 2rem 0;
+        }
+
+        .welcome-message h3 {
+            color: #1a202c;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .feature-list {
+            text-align: left;
+            margin-top: 1rem;
+            color: #4a5568;
+        }
+
+        .feature-list li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 260px 1fr;
+            }
+            
+            .visualization-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .sidebar {
+                order: 2;
+                max-height: 200px;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-tint"></i>
+            </div>
+            <div class="logo-text">
+                <h1>HydrAI</h1>
+                <p>Groundwater Resource Assistant</p>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
+            <a href="#"><i class="fas fa-map"></i> GIS Portal</a>
+            <a href="#"><i class="fas fa-database"></i> Data Export</a>
+            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="quick-actions">
+                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <button class="action-btn" onclick="quickQuery('current groundwater status')">
+                    <i class="fas fa-water"></i> Current Status
+                </button>
+                <button class="action-btn" onclick="quickQuery('critical blocks in India')">
+                    <i class="fas fa-exclamation-triangle"></i> Critical Areas
+                </button>
+                <button class="action-btn" onclick="quickQuery('groundwater trend analysis')">
+                    <i class="fas fa-chart-line"></i> Trend Analysis
+                </button>
+                <button class="action-btn" onclick="quickQuery('recharge vs extraction data')">
+                    <i class="fas fa-balance-scale"></i> Recharge vs Extraction
+                </button>
+                <button class="action-btn" onclick="quickQuery('state wise comparison')">
+                    <i class="fas fa-map-marked-alt"></i> State Comparison
+                </button>
+            </div>
+
+            <div class="stats-panel">
+                <h4><i class="fas fa-info-circle"></i> System Stats</h4>
+                <div class="stat-item">
+                    <span>Assessment Units</span>
+                    <span class="stat-value">6,584</span>
+                </div>
+                <div class="stat-item">
+                    <span>Safe Units</span>
+                    <span class="stat-value">4,875</span>
+                </div>
+                <div class="stat-item">
+                    <span>Critical/Over-Exploited</span>
+                    <span class="stat-value">1,186</span>
+                </div>
+                <div class="stat-item">
+                    <span>Last Updated</span>
+                    <span class="stat-value">2024-25</span>
+                </div>
+            </div>
+
+            <div class="language-selector">
+                <div class="lang-btn active" onclick="selectLanguage('en')">EN</div>
+                <div class="lang-btn" onclick="selectLanguage('hi')">हिं</div>
+                <div class="lang-btn" onclick="selectLanguage('te')">తె</div>
+                <div class="lang-btn" onclick="selectLanguage('ta')">த</div>
+            </div>
+        </aside>
+
+        <main class="chat-container">
+            <div class="chat-header">
+                <h2><i class="fas fa-robot"></i> HydrAI Assistant</h2>
+                <p>Query India's groundwater resources, assessments, and data analytics</p>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <h3>Welcome to HydrAI Assistant</h3>
+                    <p>Your intelligent groundwater resource analysis tool</p>
+                    <ul class="feature-list">
+                        <li>Current groundwater status in any block, district, or state</li>
+                        <li>Historical trends and comparative analysis</li>
+                        <li>Recharge and extraction data</li>
+                        <li>Safe vs critical area classifications</li>
+                        <li>Predictive insights and future projections</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <span>HydrAI is processing</span>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div class="input-wrapper">
+                    <input type="text" class="input-field" id="messageInput" 
+                           placeholder="Ask about groundwater data, trends, or specific locations..." 
+                           onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <div class="visualization-panel">
+            <div class="viz-header">
+                <h3>Visualizations</h3>
+                <div class="viz-tabs">
+                    <div class="viz-tab active" onclick="switchTab('charts')">Charts</div>
+                    <div class="viz-tab" onclick="switchTab('maps')">Maps</div>
+                    <div class="viz-tab" onclick="switchTab('data')">Data</div>
+                </div>
+            </div>
+
+            <div class="viz-content" id="vizContent">
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
+                    Groundwater Status Distribution
+                </div>
+                
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
+                    Trend Analysis (2017-2024)
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Status</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Punjab</td>
+                            <td><span class="status-critical">Critical</span></td>
+                            <td>109</td>
+                        </tr>
+                        <tr>
+                            <td>Kerala</td>
+                            <td><span class="status-safe">Safe</span></td>
+                            <td>152</td>
+                        </tr>
+                        <tr>
+                            <td>Haryana</td>
+                            <td><span class="status-semi">Semi-Critical</span></td>
+                            <td>69</td>
+                        </tr>
+                        <tr>
+                            <td>Gujarat</td>
+                            <td><span class="status-safe">Safe</span></td>
+                            <td>248</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Sample responses for demonstration
+        const sampleResponses = {
+            'current groundwater status': "Based on the latest 2024-25 assessment, India has 6,584 groundwater assessment units. Of these:\n\n• 4,875 units are classified as 'Safe' (74%)\n• 523 units are 'Semi-Critical' (8%)\n• 681 units are 'Critical' (10%)\n• 505 units are 'Over-Exploited' (8%)\n\nThe overall extraction is at 63% of the annual extractable groundwater resource.",
+            
+            'critical blocks in india': "Most critical groundwater areas:\n\nOver-Exploited Regions:\n• Punjab: 109 blocks (79% of state total)\n• Haryana: 69 blocks (55% of state total)\n• Rajasthan: 141 blocks (45% of state total)\n• Delhi: 8 blocks (89% of state total)\n\nThese regions require immediate intervention and regulation.",
+            
+            'groundwater trend analysis': "Groundwater trends analysis (2017-2024):\n\nImproving Regions:\n• Gujarat: +15% recharge improvement\n• Maharashtra: +8% extraction efficiency\n• Andhra Pradesh: +12% managed aquifer recharge\n\nDeclining Regions:\n• Punjab: -5% water table annually\n• Haryana: -3% sustainable yield\n• Western Rajasthan: -7% groundwater levels",
+            
+            'recharge vs extraction data': "National Groundwater Balance (2024-25):\n\n• Annual Recharge: 437.6 BCM\n• Annual Extraction: 275.9 BCM\n• Extraction Ratio: 63%\n• Net Available: 161.7 BCM\n\nTop recharge contributors:\n1. Uttar Pradesh - 68 BCM\n2. Madhya Pradesh - 42 BCM\n3. Maharashtra - 35 BCM",
+            
+            'state wise comparison': "State-wise Groundwater Status:\n\nBest Performing:\n• Kerala - 92% Safe units\n• Himachal Pradesh - 89% Safe units\n• Assam - 95% Safe units\n\nMost Critical:\n• Punjab - 79% Over-exploited/Critical\n• Delhi - 89% Over-exploited\n• Haryana - 62% Over-exploited/Critical"
+        };
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-${isUser ? 'user' : 'robot'}"></i>
+                </div>
+                <div class="message-content">
+                    ${content.replace(/\n/g, '<br>')}
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Update visualizations based on query
+            if (!isUser && content.includes('status') || content.includes('comparison')) {
+                updateVisualization();
+            }
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+
+            showTyping();
+
+            setTimeout(() => {
+                hideTyping();
+                
+                // Find matching response
+                const lowerMessage = message.toLowerCase();
+                let response = "I understand you're querying groundwater data. In the full system, I would access the INGRES database to provide real-time groundwater assessment data, historical trends, and predictive analytics for your specific query.";
+                
+                for (const [key, value] of Object.entries(sampleResponses)) {
+                    if (lowerMessage.includes(key)) {
+                        response = value;
+                        break;
+                    }
+                }
+
+                // Add some context-aware responses
+                if (lowerMessage.includes('block') || lowerMessage.includes('district') || lowerMessage.includes('state')) {
+                    response += "\n\nTip: You can ask about specific locations for detailed regional analysis.";
+                }
+
+                addMessage(response);
+                sendBtn.disabled = false;
+            }, 1200 + Math.random() * 800);
+        }
+
+        function quickQuery(query) {
+            messageInput.value = query;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !sendBtn.disabled) {
+                sendMessage();
+            }
+        }
+
+        function selectLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const langNames = {
+                'en': 'English',
+                'hi': 'Hindi',
+                'te': 'Telugu',
+                'ta': 'Tamil'
+            };
+            
+            addMessage(`Language switched to ${langNames[lang]}. Interface language updated.`);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.viz-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const vizContent = document.getElementById('vizContent');
+            
+            if (tabName === 'maps') {
+                vizContent.innerHTML = `
+                    <div class="chart-placeholder">
+                        <i class="fas fa-map" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
+                        India Groundwater Map
+                    </div>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-layer-group" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
+                        Regional Heat Map
+                    </div>
+                `;
+            } else if (tabName === 'data') {
+                vizContent.innerHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Assessment Unit</th>
+                                <th>Recharge (BCM)</th>
+                                <th>Extraction (BCM)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Block A</td><td>12.5</td><td>8.3</td><td><span class="status-safe">Safe</span></td></tr>
+                            <tr><td>Block B</td><td>7.2</td><td>9.1</td><td><span class="status-critical">Critical</span></td></tr>
+                            <tr><td>Block C</td><td>15.8</td><td>11.2</td><td><span class="status-semi">Semi-Critical</span></td></tr>
+                            <tr><td>Block D</td><td>9.3</td><td>6.7</td><td><span class="status-safe">Safe</span></td></tr>
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                vizContent.innerHTML = `
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
+                        Groundwater Status Distribution
+                    </div>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
+                        Trend Analysis (2017-2024)
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>State</th><th>Status</th><th>Units</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Punjab</td><td><span class="status-critical">Critical</span></td><td>109</td></tr>
+                            <tr><td>Kerala</td><td><span class="status-safe">Safe</span></td><td>152</td></tr>
+                            <tr><td>Haryana</td><td><span class="status-semi">Semi-Critical</span></td><td>69</td></tr>
+                            <tr><td>Gujarat</td><td><span class="status-safe">Safe</span></td><td>248</td></tr>
+                        </tbody>
+                    </table>
+                `;
+            }
+        }
+
+        function updateVisualization() {
+            // Simulate real-time data update in visualization panel
+            const tables = document.querySelectorAll('.data-table tbody');
+            if (tables.length > 0) {
+                // Add visual feedback that data is being updated
+                tables.forEach(table => {
+                    table.style.opacity = '0.7';
+                    setTimeout(() => {
+                        table.style.opacity = '1';
+                    }, 500);
+                });
+            }
+        }
+
+        // Initialize with a welcome message
+        setTimeout(() => {
+            addMessage("Hello! I'm HydrAI, your groundwater resource assistant. I have access to comprehensive groundwater data across India. How can I help you analyze groundwater resources today?");
+        }, 1000);
+    </script>
+</body>
+</html>
