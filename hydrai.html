@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydraAI - Groundwater Intelligence ChatBot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { 
+            font-family: 'Inter', sans-serif; 
+        }
+        
+        .typing-indicator {
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .message-fade-in {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chart-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .sidebar-slide {
+            transition: transform 0.3s ease-out;
+        }
+        
+        .thinking-animation::after {
+            content: '';
+            display: inline-block;
+            animation: dots 1.4s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Header -->
+    <div class="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">HydraAI</h1>
+                        <p class="text-sm text-gray-500">Groundwater Intelligence for INGRES</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="toggleSidebar" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <div class="text-sm text-gray-500 bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                        ● Online
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="flex h-screen bg-gray-50">
+        <!-- Chat Container -->
+        <div class="flex-1 flex flex-col max-w-4xl mx-auto bg-white">
+            <!-- Messages Area -->
+            <div id="messagesContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+                <!-- Messages will be inserted here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="border-t border-gray-200 bg-white p-4">
+                <div class="max-w-3xl mx-auto">
+                    <div class="flex space-x-3">
+                        <div class="flex-1 relative">
+                            <textarea
+                                id="messageInput"
+                                placeholder="Ask about groundwater data, trends, or predictions..."
+                                class="w-full resize-none border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                rows="1"
+                                style="min-height: 48px; max-height: 120px;"
+                            ></textarea>
+                            <button 
+                                id="sendButton"
+                                class="absolute right-2 bottom-2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-80 bg-white border-l border-gray-200 sidebar-slide transform translate-x-full">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-semibold text-gray-900">Data Insights</h2>
+                    <button id="closeSidebar" class="p-1 text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-4" aria-label="Tabs">
+                    <button class="tab-button border-b-2 border-blue-500 text-blue-600 py-3 px-1 text-sm font-medium" data-tab="charts">
+                        Charts
+                    </button>
+                    <button class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-3 px-1 text-sm font-medium" data-tab="maps">
+                        Maps
+                    </button>
+                    <button class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-3 px-1 text-sm font-medium" data-tab="predictions">
+                        Predictions
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <!-- Charts Tab -->
+                <div id="charts-tab" class="tab-content">
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-900 mb-3">Punjab Groundwater Levels</h3>
+                        <div class="chart-container">
+                            <canvas id="punjabChart" width="300" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-900 mb-3">State Water Stress Index</h3>
+                        <div class="chart-container">
+                            <canvas id="stressChart" width="300" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maps Tab -->
+                <div id="maps-tab" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-900 mb-3">India Water Stress Heatmap</h3>
+                        <div class="bg-gray-100 rounded-lg p-8 text-center">
+                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                            </svg>
+                            <p class="text-gray-500">Interactive map visualization</p>
+                            <p class="text-sm text-gray-400 mt-1">Showing district-wise water stress levels</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predictions Tab -->
+                <div id="predictions-tab" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-900 mb-3">Crisis Risk Forecast (2025-2029)</h3>
+                        <div class="chart-container">
+                            <canvas id="predictionChart" width="300" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex">
+                            <svg class="w-5 h-5 text-red-400 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-medium text-red-800">High Risk Alert</h4>
+                                <p class="text-sm text-red-700 mt-1">23 districts predicted to face severe crisis by 2029</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentConversation = [];
+        let isTyping = false;
+
+        // Demo conversation data
+        const demoConversation = [
+            {
+                role: 'assistant',
+                content: `Welcome to HydraAI! 🌊 
+
+I'm your intelligent groundwater assistant, connected to India's INGRES portal. I can help you with:
+
+• **Real-time groundwater analysis** across Indian states and districts
+• **Predictive modeling** for water crisis forecasting  
+• **Data visualization** of aquifer trends and patterns
+• **Multilingual support** (English, Hindi, and regional languages)
+
+What would you like to explore today?`,
+                timestamp: new Date(Date.now() - 300000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            },
+            {
+                role: 'user',
+                content: 'Show me the current groundwater status in Punjab',
+                timestamp: new Date(Date.now() - 240000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            },
+            {
+                role: 'assistant',
+                content: `## Punjab Groundwater Analysis 📊
+
+Based on the latest INGRES data (updated: March 2024), Punjab shows **critical depletion patterns**:
+
+### Current Status
+- **Average Depth**: 15.2 meters below ground level  
+- **Annual Decline Rate**: -0.3 meters/year (2015-2024)
+- **Recharge Efficiency**: 65% (below optimal 80%)
+- **Monitoring Wells**: 1,247 across 22 districts
+
+### Critical Districts
+1. **Ludhiana** - Severe depletion (-18.5m, declining 0.4m/year)
+2. **Patiala** - High stress (-16.2m, declining 0.3m/year)  
+3. **Sangrur** - Critical level (-17.8m, declining 0.5m/year)
+
+### Key Drivers
+- **Over-extraction for rice cultivation** (78% of total usage)
+- **Declining monsoon efficiency** (12% below 30-year average)
+- **Limited artificial recharge** (only 23% districts covered)
+
+*I've generated detailed visualizations showing temporal trends and district-wise comparisons. Check the sidebar for interactive charts.*`,
+                timestamp: new Date(Date.now() - 180000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                showSidebar: true
+            },
+            {
+                role: 'user', 
+                content: 'Which districts across India will face water crisis in the next 5 years?',
+                timestamp: new Date(Date.now() - 120000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            },
+            {
+                role: 'assistant',
+                content: `## 5-Year Water Crisis Prediction 🚨
+
+My predictive analysis indicates **23 districts** across India will face **severe water crisis** by 2029:
+
+### High-Risk States & Districts
+
+**🔴 Punjab** (Critical - 87% confidence)
+- Ludhiana, Patiala, Sangrur, Moga
+
+**🔴 Haryana** (High Risk - 82% confidence)  
+- Hisar, Karnal, Kurukshetra, Fatehabad
+
+**🔴 Rajasthan** (High Risk - 78% confidence)
+- Jaipur, Alwar, Bharatpur, Sikar
+
+**🟡 Gujarat** (Medium Risk - 73% confidence)
+- Mehsana, Banaskantha, Patan
+
+### Risk Assessment Methodology
+- **Historical trend analysis** (15-year data from 2,847 monitoring wells)
+- **Climate change projections** (IPCC regional scenarios)
+- **Demand growth modeling** (agricultural + industrial + domestic)
+- **Recharge potential assessment** (geological + hydrological factors)
+
+### Primary Risk Factors
+1. **Over-extraction** - 156% above sustainable yield in critical zones
+2. **Monsoon variability** - 18% increase in rainfall unpredictability  
+3. **Industrial growth** - 15% annual increase in groundwater demand
+4. **Inadequate recharge** - Only 34% districts have active programs
+
+*Check the Predictions tab for detailed risk forecasting charts and district-wise probability maps.*`,
+                timestamp: new Date(Date.now() - 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                showPredictions: true
+            }
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeInterface();
+            loadDemoConversation();
+            setupEventListeners();
+            initializeCharts();
+        });
+
+        function initializeInterface() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = '';
+        }
+
+        function setupEventListeners() {
+            // Send message
+            document.getElementById('sendButton').addEventListener('click', sendMessage);
+            document.getElementById('messageInput').addEventListener('keydown', handleKeyDown);
+            
+            // Auto-resize textarea
+            document.getElementById('messageInput').addEventListener('input', autoResizeTextarea);
+            
+            // Sidebar controls
+            document.getElementById('toggleSidebar').addEventListener('click', toggleSidebar);
+            document.getElementById('closeSidebar').addEventListener('click', closeSidebar);
+            
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResizeTextarea() {
+            const textarea = document.getElementById('messageInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function loadDemoConversation() {
+            demoConversation.forEach((message, index) => {
+                setTimeout(() => {
+                    addMessage(message);
+                    if (message.showSidebar) {
+                        setTimeout(() => openSidebar(), 500);
+                    }
+                    if (message.showPredictions) {
+                        setTimeout(() => {
+                            switchTab('predictions');
+                            openSidebar();
+                        }, 500);
+                    }
+                }, index * 1000);
+            });
+        }
+
+        function addMessage(message) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message-fade-in';
+            
+            if (message.role === 'assistant') {
+                messageDiv.innerHTML = `
+                    <div class="flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1 max-w-3xl">
+                            <div class="bg-gray-100 rounded-lg px-4 py-3">
+                                <div class="prose prose-sm max-w-none">
+                                    ${formatMessageContent(message.content)}
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1 ml-1">${message.timestamp}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex justify-end">
+                        <div class="max-w-3xl">
+                            <div class="bg-blue-600 text-white rounded-lg px-4 py-3">
+                                <div class="text-sm">
+                                    ${formatMessageContent(message.content)}
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1 text-right mr-1">${message.timestamp}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatMessageContent(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
+                .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-4 mb-3">$1</h2>')
+                .replace(/^- (.*$)/gm, '<li class="ml-4">$1</li>')
+                .replace(/^\d+\. (.*$)/gm, '<li class="ml-4">$1</li>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex space-x-3 message-fade-in';
+            
+            typingDiv.innerHTML = `
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-3xl">
+                    <div class="bg-gray-100 rounded-lg px-4 py-3">
+                        <div class="text-gray-600 text-sm">
+                            <span class="thinking-animation">HydraAI is analyzing</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+            
+            // Add user message
+            addMessage({
+                role: 'user',
+                content: message,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+            
+            input.value = '';
+            input.style.height = 'auto';
+            isTyping = true;
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate AI response
+            setTimeout(() => {
+                removeTypingIndicator();
+                addMessage({
+                    role: 'assistant',
+                    content: `Thank you for your question! In a production environment, I would analyze the latest INGRES groundwater data and provide detailed insights specific to your query.
+
+**For this demo**, I'm showcasing the interface and conversation flow. The real HydraAI would:
+
+• Query live INGRES database for current data
+• Run predictive models for trend analysis  
+• Generate interactive visualizations
+• Provide actionable recommendations
+• Support queries in multiple Indian languages`,
+                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                });
+                isTyping = false;
+            }, 2000);
+        }
+
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.style.transform === 'translateX(0px)') {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.style.transform = 'translateX(0px)';
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.style.transform = 'translateX(100%)';
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('border-blue-500', 'text-blue-600');
+                button.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('border-transparent', 'text-gray-500');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('border-blue-500', 'text-blue-600');
+            
+            // Show/hide tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+        }
+
+        function initializeCharts() {
+            // Punjab groundwater chart
+            const punjabCtx = document.getElementById('punjabChart').getContext('2d');
+            new Chart(punjabCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+                    datasets: [{
+                        label: 'Groundwater Level (meters below surface)',
+                        data: [-12.8, -13.5, -14.1, -14.6, -15.0, -15.2],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: 'Depth (m)' }
+                        }
+                    }
+                }
+            });
+
+            // Water stress chart
+            const stressCtx = document.getElementById('stressChart').getContext('2d');
+            new Chart(stressCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Punjab', 'Haryana', 'Rajasthan', 'Gujarat', 'UP'],
+                    datasets: [{
+                        label: 'Water Stress Index (%)',
+                        data: [87, 78, 72, 68, 58],
+                        backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Stress Level (%)' }
+                        }
+                    }
+                }
+            });
+
+            // Prediction chart
+            const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+            new Chart(predictionCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2026', '2027', '2028', '2029'],
+                    datasets: [
+                        {
+                            label: 'High Risk Districts',
+                            data: [12, 16, 19, 21, 23],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Confidence Interval',
+                            data: [8, 12, 15, 17, 19],
+                            borderColor: '#f97316',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Number of Districts' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
