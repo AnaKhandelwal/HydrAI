@@ -11,6 +11,37 @@
             padding: 0;
             box-sizing: border-box;
         }
+        html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; 
+}
+
+.main-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.chat-section {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    background: #fafafa;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto; 
+    padding: 1rem;
+}
+
+.chat-input {
+    border-top: 1px solid #ddd;
+    padding: 0.5rem;
+    background: white;
+}
+
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -511,13 +542,6 @@
                 <p>Groundwater Resource Assistant</p>
             </div>
         </div>
-        <nav class="nav-links">
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
-            <a href="#"><i class="fas fa-map"></i> GIS Portal</a>
-            <a href="#"><i class="fas fa-database"></i> Data Export</a>
-            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
-        </nav>
     </header>
 
     <div class="main-container">
@@ -536,9 +560,6 @@
                 <button class="action-btn" onclick="quickQuery('recharge vs extraction data')">
                     <i class="fas fa-balance-scale"></i> Recharge vs Extraction
                 </button>
-                <button class="action-btn" onclick="quickQuery('state wise comparison')">
-                    <i class="fas fa-map-marked-alt"></i> State Comparison
-                </button>
             </div>
 
             <div class="stats-panel">
@@ -555,10 +576,6 @@
                     <span>Critical/Over-Exploited</span>
                     <span class="stat-value">1,186</span>
                 </div>
-                <div class="stat-item">
-                    <span>Last Updated</span>
-                    <span class="stat-value">2024-25</span>
-                </div>
             </div>
 
             <div class="language-selector">
@@ -573,6 +590,9 @@
             <div class="chat-header">
                 <h2><i class="fas fa-robot"></i> HydrAI Assistant</h2>
                 <p>Query India's groundwater resources, assessments, and data analytics</p>
+                <div class="connection-status checking" id="connectionStatus">
+                    <i class="fas fa-circle"></i> Checking connection...
+                </div>
             </div>
 
             <div class="chat-messages" id="chatMessages">
@@ -612,7 +632,7 @@
                 </div>
             </div>
         </main>
-
+        
         <div class="visualization-panel">
             <div class="viz-header">
                 <h3>Visualizations</h3>
@@ -668,6 +688,7 @@
             </div>
         </div>
     </div>
+    </div>
 
     <script>
         let currentLanguage = 'en';
@@ -675,27 +696,66 @@
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
+        const connectionStatus = document.getElementById('connectionStatus');
 
-        // Sample responses for demonstration
-        const sampleResponses = {
-            'current groundwater status': "Based on the latest 2024-25 assessment, India has 6,584 groundwater assessment units. Of these:\n\n• 4,875 units are classified as 'Safe' (74%)\n• 523 units are 'Semi-Critical' (8%)\n• 681 units are 'Critical' (10%)\n• 505 units are 'Over-Exploited' (8%)\n\nThe overall extraction is at 63% of the annual extractable groundwater resource.",
-            
-            'critical blocks in india': "Most critical groundwater areas:\n\nOver-Exploited Regions:\n• Punjab: 109 blocks (79% of state total)\n• Haryana: 69 blocks (55% of state total)\n• Rajasthan: 141 blocks (45% of state total)\n• Delhi: 8 blocks (89% of state total)\n\nThese regions require immediate intervention and regulation.",
-            
-            'groundwater trend analysis': "Groundwater trends analysis (2017-2024):\n\nImproving Regions:\n• Gujarat: +15% recharge improvement\n• Maharashtra: +8% extraction efficiency\n• Andhra Pradesh: +12% managed aquifer recharge\n\nDeclining Regions:\n• Punjab: -5% water table annually\n• Haryana: -3% sustainable yield\n• Western Rajasthan: -7% groundwater levels",
-            
-            'recharge vs extraction data': "National Groundwater Balance (2024-25):\n\n• Annual Recharge: 437.6 BCM\n• Annual Extraction: 275.9 BCM\n• Extraction Ratio: 63%\n• Net Available: 161.7 BCM\n\nTop recharge contributors:\n1. Uttar Pradesh - 68 BCM\n2. Madhya Pradesh - 42 BCM\n3. Maharashtra - 35 BCM",
-            
-            'state wise comparison': "State-wise Groundwater Status:\n\nBest Performing:\n• Kerala - 92% Safe units\n• Himachal Pradesh - 89% Safe units\n• Assam - 95% Safe units\n\nMost Critical:\n• Punjab - 79% Over-exploited/Critical\n• Delhi - 89% Over-exploited\n• Haryana - 62% Over-exploited/Critical"
+        // ===== API CONFIGURATION =====
+        const API_CONFIG = {
+            baseURL: 'https://4f4380bfb17d.ngrok-free.app',
+            endpoint: '/ask',
+            timeout: 30000
         };
 
-        function addMessage(content, isUser = false) {
+        // Test API connection
+        async function testAPIConnection() {
+            console.log('Testing API connection...');
+            updateConnectionStatus('checking');
+            
+            try {
+                // Try health check first
+                const healthResponse = await fetch(`${API_CONFIG.baseURL}/`, {
+                    method: 'GET',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                
+                console.log('Health check response:', healthResponse.status);
+                
+                if (healthResponse.ok) {
+                    const data = await healthResponse.json();
+                    console.log('Health check data:', data);
+                    updateConnectionStatus('connected');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Connection test failed:', error);
+            }
+            
+            updateConnectionStatus('disconnected');
+            return false;
+        }
+
+        function updateConnectionStatus(status) {
+            if (status === 'connected') {
+                connectionStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connected to API';
+                connectionStatus.className = 'connection-status connected';
+            } else if (status === 'checking') {
+                connectionStatus.innerHTML = '<i class="fas fa-sync fa-spin"></i> Connecting...';
+                connectionStatus.className = 'connection-status checking';
+            } else {
+                connectionStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> API Offline';
+                connectionStatus.className = 'connection-status disconnected';
+            }
+        }
+
+        // ===== CHAT FUNCTIONS =====
+        function addMessage(content, isUser = false, isError = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'} ${isError ? 'error' : ''}`;
             
             messageDiv.innerHTML = `
                 <div class="message-avatar">
-                    <i class="fas fa-${isUser ? 'user' : 'robot'}"></i>
+                    <i class="fas fa-${isUser ? 'user' : isError ? 'exclamation-triangle' : 'robot'}"></i>
                 </div>
                 <div class="message-content">
                     ${content.replace(/\n/g, '<br>')}
@@ -704,11 +764,6 @@
             
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Update visualizations based on query
-            if (!isUser && content.includes('status') || content.includes('comparison')) {
-                updateVisualization();
-            }
         }
 
         function showTyping() {
@@ -720,6 +775,47 @@
             typingIndicator.style.display = 'none';
         }
 
+        // ===== API CALL =====
+        async function callLLMAPI(userMessage) {
+            try {
+                console.log('Calling API with message:', userMessage);
+                
+                const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({
+                        query: userMessage,
+                        lang: currentLanguage
+                    }),
+                    signal: AbortSignal.timeout(API_CONFIG.timeout)
+                });
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                updateConnectionStatus('connected');
+                
+                return data.answer || data.response || data.message || 'No response from API';
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                updateConnectionStatus('disconnected');
+                throw error;
+            }
+        }
+
+        // ===== SEND MESSAGE =====
         function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
@@ -730,28 +826,22 @@
 
             showTyping();
 
-            setTimeout(() => {
-                hideTyping();
-                
-                // Find matching response
-                const lowerMessage = message.toLowerCase();
-                let response = "I understand you're querying groundwater data. In the full system, I would access the INGRES database to provide real-time groundwater assessment data, historical trends, and predictive analytics for your specific query.";
-                
-                for (const [key, value] of Object.entries(sampleResponses)) {
-                    if (lowerMessage.includes(key)) {
-                        response = value;
-                        break;
-                    }
-                }
-
-                // Add some context-aware responses
-                if (lowerMessage.includes('block') || lowerMessage.includes('district') || lowerMessage.includes('state')) {
-                    response += "\n\nTip: You can ask about specific locations for detailed regional analysis.";
-                }
-
-                addMessage(response);
-                sendBtn.disabled = false;
-            }, 1200 + Math.random() * 800);
+            callLLMAPI(message)
+                .then(response => {
+                    hideTyping();
+                    addMessage(response);
+                    sendBtn.disabled = false;
+                })
+                .catch(error => {
+                    hideTyping();
+                    console.error('Error:', error);
+                    addMessage(
+                        `⚠️ API Error: ${error.message}\n\nTroubleshooting:\n• Check if FastAPI server is running\n• Verify ngrok URL is correct\n• Check browser console for CORS errors`, 
+                        false, 
+                        true
+                    );
+                    sendBtn.disabled = false;
+                });
         }
 
         function quickQuery(query) {
@@ -769,96 +859,21 @@
             currentLanguage = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
-            const langNames = {
-                'en': 'English',
-                'hi': 'Hindi',
-                'te': 'Telugu',
-                'ta': 'Tamil'
-            };
-            
-            addMessage(`Language switched to ${langNames[lang]}. Interface language updated.`);
         }
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.viz-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
+        // ===== INITIALIZATION =====
+        window.addEventListener('load', async () => {
+            console.log('Page loaded, testing connection...');
+            const isConnected = await testAPIConnection();
             
-            const vizContent = document.getElementById('vizContent');
-            
-            if (tabName === 'maps') {
-                vizContent.innerHTML = `
-                    <div class="chart-placeholder">
-                        <i class="fas fa-map" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
-                        India Groundwater Map
-                    </div>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-layer-group" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
-                        Regional Heat Map
-                    </div>
-                `;
-            } else if (tabName === 'data') {
-                vizContent.innerHTML = `
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Assessment Unit</th>
-                                <th>Recharge (BCM)</th>
-                                <th>Extraction (BCM)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Block A</td><td>12.5</td><td>8.3</td><td><span class="status-safe">Safe</span></td></tr>
-                            <tr><td>Block B</td><td>7.2</td><td>9.1</td><td><span class="status-critical">Critical</span></td></tr>
-                            <tr><td>Block C</td><td>15.8</td><td>11.2</td><td><span class="status-semi">Semi-Critical</span></td></tr>
-                            <tr><td>Block D</td><td>9.3</td><td>6.7</td><td><span class="status-safe">Safe</span></td></tr>
-                        </tbody>
-                    </table>
-                `;
-            } else {
-                vizContent.innerHTML = `
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
-                        Groundwater Status Distribution
-                    </div>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
-                        Trend Analysis (2017-2024)
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr><th>State</th><th>Status</th><th>Units</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Punjab</td><td><span class="status-critical">Critical</span></td><td>109</td></tr>
-                            <tr><td>Kerala</td><td><span class="status-safe">Safe</span></td><td>152</td></tr>
-                            <tr><td>Haryana</td><td><span class="status-semi">Semi-Critical</span></td><td>69</td></tr>
-                            <tr><td>Gujarat</td><td><span class="status-safe">Safe</span></td><td>248</td></tr>
-                        </tbody>
-                    </table>
-                `;
-            }
-        }
-
-        function updateVisualization() {
-            // Simulate real-time data update in visualization panel
-            const tables = document.querySelectorAll('.data-table tbody');
-            if (tables.length > 0) {
-                // Add visual feedback that data is being updated
-                tables.forEach(table => {
-                    table.style.opacity = '0.7';
-                    setTimeout(() => {
-                        table.style.opacity = '1';
-                    }, 500);
-                });
-            }
-        }
-
-        // Initialize with a welcome message
-        setTimeout(() => {
-            addMessage("Hello! I'm HydrAI, your groundwater resource assistant. I have access to comprehensive groundwater data across India. How can I help you analyze groundwater resources today?");
-        }, 1000);
+            setTimeout(() => {
+                if (isConnected) {
+                    addMessage("Hello! I'm HydrAI. I'm connected and ready to help you analyze groundwater resources across India. Ask me anything!");
+                } else {
+                    addMessage("⚠️ Unable to connect to the API server. Please check:\n1. FastAPI server is running\n2. Ngrok tunnel is active\n3. URL in code matches your ngrok URL", false, true);
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
