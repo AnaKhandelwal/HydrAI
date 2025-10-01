@@ -49,18 +49,31 @@ Built to make groundwater intelligence accessible to **farmers, NGOs, and policy
 
 ## 📂 Project Structure
 project/
+
 │── backend/ # FastAPI app + LLM pipeline
+
 │ ├── app.py # API routes
+
 │ ├── models/ # ML + LLM models
+
 │ └── db/ # Supabase integration
+
 │
+
 │── frontend/ # HTML/CSS/JS app
+
 │ ├── index.html # Landing page + sidebar
+
 │ ├── chatbot.html # Chat interface
+
 │ ├── style.css # Styling for UI
+
 │ └── script.js # Handles chat + API calls
+
 │
+
 │── datasets/ # Groundwater datasets (CGWB + state)
+
 │── README.md # Documentation
 
 ---
