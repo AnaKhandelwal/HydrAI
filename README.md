@@ -1,4 +1,5 @@
-#HydrAI
+**HydrAI**
+
 💧 AI-Powered Groundwater Insights Platform
 
 An AI-powered system delivering **real-time groundwater insights** across **733 districts** in India using **CGWB and state datasets**.  
