@@ -1,102 +1,96 @@
-# HydrAI
+#HydrAI
 💧 AI-Powered Groundwater Insights Platform
 
-This project is an AI-powered system that delivers real-time groundwater insights across 733 districts in India, using CGWB and state datasets.
+An AI-powered system delivering **real-time groundwater insights** across **733 districts** in India using **CGWB and state datasets**.  
 
-It combines an AI chatbot interface for natural-language queries with interactive dashboards for district-level visualization, making groundwater intelligence accessible to farmers, NGOs, and policymakers.
+The platform combines:
+- 🧠 **AI chatbot** for natural-language queries  
+- 📊 **Interactive dashboards** with district-level visualizations  
+- 🔮 **Predictive modeling** for groundwater stress analysis  
 
-🚀 Features
+Built to make groundwater intelligence accessible to **farmers, NGOs, and policymakers**.
 
-AI Chatbot Interface
+---
 
-Ask questions in natural language about groundwater conditions.
+## 🚀 Features
 
-LLM-powered retrieval with context-aware responses.
+- **Chatbot Interface**
+  - Natural language queries
+  - LLM-powered retrieval with contextual answers
+  - User vs. bot styled chat bubbles
 
-Integrated into a clean chat UI with user vs. bot message styling.
+- **Visualization Sidebar**
+  - Groundwater status distribution
+  - Trend analysis (2017–2024)
+  - State-wise tabular insights
+  - Tabs: *Charts | Maps | Data*
 
-Visualization Sidebar
+- **Predictive Modeling**
+  - Derived features: stress indices, recharge efficiency, seasonal trends
+  - Achieves >80% accuracy in stress prediction
 
-District-level charts and stats.
+- **Deployment**
+  - Working prototype combining **FastAPI backend** + **React frontend**
+  - Deployed with **ngrok** (prototype-ready for cloud)
 
-Trend analysis (2017–2024).
+---
 
-Tabbed dashboards: Charts | Maps | Data.
+## 📊 Tech Stack
 
-Predictive Modeling
+- **Frontend:** ReactJS  
+- **Backend:** FastAPI  
+- **LLM/RAG:** LangChain + LlamaIndex  
+- **Database:** Supabase  
+- **Visualization:** Plotly / Matplotlib  
+- **Deployment:** ngrok / cloud-ready  
 
-Derived features (stress indices, recharge efficiency, seasonal trends).
+---
 
-80% accuracy in groundwater stress prediction.
-
-Deployment
-
-Fully working prototype deployed with FastAPI backend + React frontend.
-
-📊 Tech Stack
-
-Data Layer: Supabase
-
-AI/LLM: LangChain
- + LlamaIndex
-
-Backend: FastAPI
-
-Frontend: ReactJS (chat + visualization dashboard)
-
-Visualization: Plotly / Matplotlib
-
-Hosting: ngrok (prototype) / cloud deployment-ready
-
-📂 Project Structure
+## 📂 Project Structure
 project/
-│── backend/              # FastAPI app + LLM pipeline
-│   ├── app.py            # FastAPI routes
-│   ├── models/           # ML + LLM models
-│   └── db/               # Supabase integration
+│── backend/ # FastAPI app + LLM pipeline
+│ ├── app.py # API routes
+│ ├── models/ # ML + LLM models
+│ └── db/ # Supabase integration
 │
-│── frontend/             # React app (chat + sidebar)
-│   ├── src/
-│   │   ├── components/   # Chat UI, Sidebar, Tabs
-│   │   ├── App.js
-│   │   └── index.js
-│   └── public/
+│── frontend/ # HTML/CSS/JS app
+│ ├── index.html # Landing page + sidebar
+│ ├── chatbot.html # Chat interface
+│ ├── style.css # Styling for UI
+│ └── script.js # Handles chat + API calls
 │
-│── datasets/             # Groundwater datasets (CGWB + state)
-│── README.md             # Documentation
+│── datasets/ # Groundwater datasets (CGWB + state)
+│── README.md # Documentation
 
-⚙️ Installation & Setup
+---
 
-Clone this repository
+## ⚙️ Installation & Setup
 
+### 1. Clone the repository
+```bash
 git clone https://github.com/your-username/groundwater-ai.git
 cd groundwater-ai
-
-
-Backend (FastAPI)
-
+```
+#Backend (FastAPI)
+```bash
+Copy code
 cd backend
 pip install -r requirements.txt
 uvicorn app:app --reload
+```
+#Frontend (HTML)
+Open frontend/index.html in your browser
 
+Or serve it locally:
 
-Frontend (React)
-
+```bash
+Copy code
 cd frontend
-npm install
-npm start
+python -m http.server 8001
+```
+Access at: http://localhost:8001
+Access the app
+Frontend: http://localhost:8001 (or open HTML directly)
 
+Backend API: http://localhost:8000
 
-Access the system
-
-Frontend (Chat + Dashboard) → http://localhost:3000
-
-Backend (API/LLM) → http://localhost:8000
-
-🎯 Use Cases
-
-Farmers: Get district-level insights for irrigation planning.
-
-NGOs: Monitor groundwater stress for sustainable projects.
-
-Policymakers: Access real-time analytics for water resource management.
